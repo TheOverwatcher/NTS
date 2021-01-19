@@ -1,14 +1,8 @@
 const fs = require('fs');
-const https = require('https');
 const express = require('express');
 const axios = require('axios');
 
 const app = express();
-
-// const options = {
-//     keys:fs.readFileSync('sslcert/'),
-//     cert:fs.readFileSync('sslcert/')
-// };
 
 app.use(express.json());
 

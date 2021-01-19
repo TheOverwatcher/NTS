@@ -1,6 +1,7 @@
 const fs = require('fs');
 const https = require('https');
 const express = require('express');
+const axios = require('axios');
 
 const app = express();
 
@@ -11,14 +12,36 @@ const app = express();
 
 app.use(express.json());
 
+app.post('/queue', (req, res) => {
+    console.log('New item for the queue.');
+    let data = JSON.stringify(req.body);
+
+    // console.log('Payload: ' + data);
+    res.status(200).send({resp:'Queue request processed.'});
+});
+
 app.post('/test', (req, res) => {
     console.log('Request received.');
-    console.log('Payload: ' + JSON.stringify(req.body));
+    let data = JSON.stringify(req.body);
+
+    // console.log('Payload: ' + data);
     fs.writeFileSync('test.json', JSON.stringify(req.body), (err) => {
         if (err) throw err;
         console.log('The file has been saved');
     });
+
+    console.log('Sending response from webhook');
     res.status(200).send({resp:'Request processed'});
+
+    console.log('Formulate POST request');
+    axios.post('http://localhost:8088/queue', data)
+    .then((response) => {
+        console.log(`statusCode ${response.status}`);
+    })
+    .catch((error) => {
+        console.error(error);
+    });
+
 });
 
 //let httpsServer = https.createServer();

@@ -14,6 +14,10 @@ app.use(express.json());
 app.post('/test', (req, res) => {
     console.log('Request received.');
     console.log('Payload: ' + JSON.stringify(req.body));
+    fs.writeFileSync('test.json', JSON.stringify(req.body), (err) => {
+        if (err) throw err;
+        console.log('The file has been saved');
+    });
     res.status(200).send({resp:'Request processed'});
 });
 

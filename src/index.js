@@ -13,7 +13,8 @@ app.use(express.json());
 
 app.post('/test', (req, res) => {
     console.log('Request received.');
-    res.status(200).send('');
+    console.log('Payload: ' + JSON.stringify(req.body));
+    res.status(200).send({resp:'Request processed'});
 });
 
 //let httpsServer = https.createServer();

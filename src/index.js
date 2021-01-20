@@ -1,6 +1,7 @@
 const fs = require('fs');
 const express = require('express');
 const amqp = require('amqplib/callback_api');
+const Consumer = require('../src/consumer.js');
 
 const app = express();
 
@@ -42,8 +43,8 @@ app.post('/test', (req, res) => {
             // Can this be done in a finally
             setTimeout(() => {
                 connection.close();
-                process.exit(0);
-            }, 500)
+                // process.exit(0);
+            }, 500);
 
         });
     }
@@ -62,3 +63,5 @@ const server = app.listen(
         console.log('Server listenting on ' + host + ':' + port);
     }
 );
+
+new Consumer().start();

@@ -12,7 +12,7 @@ app.post('/test', (req, res) => {
     let data = JSON.stringify(req.body);
 
     // console.log('Payload: ' + data);
-    fs.writeFileSync('test.json', JSON.stringify(req.body), (err) => {
+    fs.writeFileSync('test.json', data, (err) => {
         if (err) throw err;
         console.log('The file has been saved');
     });

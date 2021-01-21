@@ -1,0 +1,13 @@
+{
+    "queue":"upload",
+    "consumer": {
+        "workerCount": 2
+    },
+    "log":{
+        "errorFile":"./logs/error.log",
+        "logFile":"./logs/nts.log",
+        "format": {
+            "label":"NTS"
+        }
+    }
+}

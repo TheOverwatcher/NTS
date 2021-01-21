@@ -26,6 +26,7 @@ app.post('/test', (req, res) => {
             if(error0) {
                 throw error0;
             }
+            console.log('Connection created');
 
             connection.createChannel((error1, channel) => {
                 if(error1) {

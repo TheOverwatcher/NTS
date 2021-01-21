@@ -1,5 +1,6 @@
 
 const amqp = require('amqplib/callback_api');
+const config = require('../config.json')
 
 module.exports = class Consumer {
     constructor() {
@@ -7,6 +8,12 @@ module.exports = class Consumer {
     }
 
     start() {
+        for(let i = 0; i < config.consumer.workerCount; i++) {
+            this.startConsumer({name: 'Consumer' + i});
+        }
+    }
+
+    startConsumer(params) {
         try {
             amqp.connect('amqp://localhost', (error0, connection) => {
                 if(error0) {
@@ -21,9 +28,9 @@ module.exports = class Consumer {
                     var queue = 'hello';
     
                     channel.assertQueue(queue, { durable: false })
-                    console.log(' [*] Waiting for messages in %s. To exit press CTRL+C', queue)
+                    console.log(` [${params.name}] Waiting for messages in ${queue}. To exit press CTRL+C`)
                     channel.consume(queue, (message) => {
-                        console.log(' [x] Received %s', message.content.toString());
+                        console.log(` [${params.name}] Received ${message.content.toString()}`, );
                     }, {noAck: true});
                 });
     

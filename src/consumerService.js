@@ -2,7 +2,7 @@
 const amqp = require('amqplib/callback_api');
 const config = require('../config.json')
 
-module.exports = class Consumer {
+module.exports = class ConsumerService {
     constructor() {
 
     }
@@ -24,12 +24,10 @@ module.exports = class Consumer {
                     if(error1) {
                         throw error1;
                     }
-    
-                    var queue = 'hello';
-    
-                    channel.assertQueue(queue, { durable: false })
-                    console.log(` [${params.name}] Waiting for messages in ${queue}. To exit press CTRL+C`)
-                    channel.consume(queue, (message) => {
+        
+                    channel.assertQueue(config.queue, { durable: false })
+                    console.log(` [${params.name}] Waiting for messages in ${config.queue}. To exit press CTRL+C`)
+                    channel.consume(config.queue, (message) => {
                         console.log(` [${params.name}] Received ${message.content.toString()}`, );
                     }, {noAck: true});
                 });

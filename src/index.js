@@ -1,13 +1,14 @@
 const fs = require('fs');
 const express = require('express');
-const amqp = require('amqplib/callback_api');
-const Consumer = require('../src/consumer.js');
+const config = require('../config.json');
+const QueueUtil = require('./QueueUtil.js');
 
 const app = express();
+const QU = new QueueUtil();
 
 app.use(express.json());
 
-app.post('/test', (req, res) => {
+app.post('/test', async (req, res) => {
     console.log('Request received.');
     let data = JSON.stringify(req.body);
 
@@ -21,37 +22,14 @@ app.post('/test', (req, res) => {
     res.status(200).send({resp:'Request processed'});
 
     console.log('Setup connection to RabbitMQ');
-    try {
-        amqp.connect('amqp://localhost', (error0, connection) => {
-            if(error0) {
-                throw error0;
-            }
-            console.log('Connection created');
 
-            connection.createChannel((error1, channel) => {
-                if(error1) {
-                    throw error1;
-                }
+    let publisher = QU.getPublisher();
+    publisher.then((channel) => {
+        channel.assertQueue(config.queue, {durable:false});
+        channel.sendToQueue(config.queue,Buffer.from(data));
+        console.log('We aren\'t empty');
+    });
 
-                var queue = 'hello';
-                var message = 'Hello World';
-
-                channel.assertQueue(queue, { durable: false })
-
-                channel.sendToQueue(queue, Buffer.from(message));
-                console.log(' [x] sent %s', message)
-            });
-            // Can this be done in a finally
-            setTimeout(() => {
-                connection.close();
-                // process.exit(0);
-            }, 500);
-
-        });
-    }
-    catch (error) {
-        console.log("Error occurred: " + error);
-    }
 });
 
 const server = app.listen(
@@ -61,8 +39,8 @@ const server = app.listen(
         let host = server.address().address;
         let port = server.address().port;
 
+        QU.startConsumerService();
+
         console.log('Server listenting on ' + host + ':' + port);
     }
 );
-
-new Consumer().start();

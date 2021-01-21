@@ -12,26 +12,36 @@ const QueueUtil = new qUtil({"logger":logger});
 app.use(express.json());
 
 app.post('/test', async (req, res) => {
-    logger.info('Request received.');
+    logger.info(new StringBuilder('Request received.').toString());
     let data = JSON.stringify(req.body);
 
     fs.writeFileSync(config.test.filename, data, (err) => {
         if (err) throw err;
-        logger.info('The file has been saved');
+        logger.info(new StringBuilder('The file has been saved').toString());
     });
 
-    logger.info('Sending response from webhook');
+    logger.info(new StringBuilder('Sending response from webhook').toString());
     res.status(200).send({resp:'Request processed'});
 
-    logger.info('Setup connection to RabbitMQ');
-
+    logger.info(new StringBuilder('Setup connection to RabbitMQ').toString());
     let publisher = QueueUtil.getPublisher();
+
     publisher.then((channel) => {
+        logger.info(new StringBuilder('Assert queue exists.').toString());
         channel.assertQueue(config.queue, {durable:false});
+
+        logger.info(new StringBuilder('Sending data to queue.').toString());
         channel.sendToQueue(config.queue,Buffer.from(data));
-        logger.info('We aren\'t empty');
+
     }).catch((err) => {
-        logger.info('ERROR',err);
+        logger.info('ERROR',
+            new StringBuilder()
+                .append('Error occurred sending data to queue [')
+                .append(config.queue)
+                .append('] Error: ')
+                .append(err)
+                .toString()
+        );
     });
 
 });
@@ -45,12 +55,13 @@ const server = app.listen(
 
         QueueUtil.startConsumerService();
 
-        let message = new StringBuilder()
-            .append('Server listenting on ')
-            .append(host)
-            .append(':')
-            .append(port)
-            .toString(); 
-        logger.info(message);            
+        logger.info(
+            new StringBuilder()
+                .append('Server listenting on ')
+                .append(host)
+                .append(':')
+                .append(port)
+                .toString()
+        );            
     }
 );

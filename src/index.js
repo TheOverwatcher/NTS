@@ -1,33 +1,37 @@
 const fs = require('fs');
 const express = require('express');
 const config = require('../config.json');
-const QueueUtil = require('./QueueUtil.js');
+const StringBuilder = require('node-stringbuilder');
+const qUtil = require('./QueueUtil');
+const Utils = require('./utils.js');
 
 const app = express();
-const QU = new QueueUtil();
+const logger = Utils.logger;
+const QueueUtil = new qUtil({"logger":logger});
 
 app.use(express.json());
 
 app.post('/test', async (req, res) => {
-    console.log('Request received.');
+    logger.info('Request received.');
     let data = JSON.stringify(req.body);
 
-    // console.log('Payload: ' + data);
     fs.writeFileSync('test.json', data, (err) => {
         if (err) throw err;
-        console.log('The file has been saved');
+        logger.info('The file has been saved');
     });
 
-    console.log('Sending response from webhook');
+    logger.info('Sending response from webhook');
     res.status(200).send({resp:'Request processed'});
 
-    console.log('Setup connection to RabbitMQ');
+    logger.info('Setup connection to RabbitMQ');
 
-    let publisher = QU.getPublisher();
+    let publisher = QueueUtil.getPublisher();
     publisher.then((channel) => {
         channel.assertQueue(config.queue, {durable:false});
         channel.sendToQueue(config.queue,Buffer.from(data));
-        console.log('We aren\'t empty');
+        logger.info('We aren\'t empty');
+    }).catch((err) => {
+        logger.info('ERROR',err);
     });
 
 });
@@ -39,8 +43,14 @@ const server = app.listen(
         let host = server.address().address;
         let port = server.address().port;
 
-        QU.startConsumerService();
+        QueueUtil.startConsumerService();
 
-        console.log('Server listenting on ' + host + ':' + port);
+        let message = new StringBuilder()
+            .append('Server listenting on ')
+            .append(host)
+            .append(':')
+            .append(port)
+            .toString(); 
+        logger.info(message);            
     }
 );

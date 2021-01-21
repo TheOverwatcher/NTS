@@ -1,10 +1,11 @@
 
 const amqp = require('amqplib/callback_api');
 const config = require('../config.json')
+const Utils = require('./utils');
 
 module.exports = class ConsumerService {
-    constructor() {
-
+    constructor(args) {
+        this.logger = args.logger;
     }
 
     start() {
@@ -26,16 +27,16 @@ module.exports = class ConsumerService {
                     }
         
                     channel.assertQueue(config.queue, { durable: false })
-                    console.log(` [${params.name}] Waiting for messages in ${config.queue}. To exit press CTRL+C`)
+                    this.logger.info(` [${params.name}] Waiting for messages in ${config.queue}. To exit press CTRL+C`)
                     channel.consume(config.queue, (message) => {
-                        console.log(` [${params.name}] Received ${message.content.toString()}`, );
+                        this.logger.info(` [${params.name}] Received ${message.content.toString()}`, );
                     }, {noAck: true});
                 });
     
             });
         }
         catch (error) {
-            console.log("Error occurred: " + error);
+            this.logger.info("Error occurred: " + error);
         }
     }
 };

@@ -2,8 +2,9 @@ const amqp = require('amqplib');
 const ConsumerService = require('./consumerService.js');
 
 module.exports = class QueueUtil {
-    constructor() {
-        this.consumerService = new ConsumerService();
+    constructor(args) {
+        this.logger = args.logger;
+        this.consumerService = new ConsumerService({"logger":this.logger});
     }
 
     startConsumerService() {
@@ -18,8 +19,8 @@ module.exports = class QueueUtil {
             })
         }
         catch (error) {
-            console.log(' [x] error connecting to rabbitmq')
-            console.log(error);
+            this.logger.info(' [x] error connecting to rabbitmq')
+            this.logger.info(error);
         }
         
     }

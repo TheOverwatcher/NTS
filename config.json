@@ -9,5 +9,8 @@
         "format": {
             "label":"NTS"
         }
+    },
+    "test":{
+        "filename":"./test/test.json"
     }
 }

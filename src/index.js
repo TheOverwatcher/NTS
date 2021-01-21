@@ -15,7 +15,7 @@ app.post('/test', async (req, res) => {
     logger.info('Request received.');
     let data = JSON.stringify(req.body);
 
-    fs.writeFileSync('test.json', data, (err) => {
+    fs.writeFileSync(config.test.filename, data, (err) => {
         if (err) throw err;
         logger.info('The file has been saved');
     });
